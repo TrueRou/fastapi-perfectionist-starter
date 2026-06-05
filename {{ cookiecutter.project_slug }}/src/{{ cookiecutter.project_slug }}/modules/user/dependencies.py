@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from {{ cookiecutter.project_slug }}.infra import models
 from {{ cookiecutter.project_slug }}.modules.user import UserService
 
-security_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/token", auto_error=False)
+security_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", auto_error=False)
 
 
 class RequireUserOptional:
@@ -32,7 +32,7 @@ class RequireUser:
     async def __call__(
         self,
         dep_user: Annotated[models.User | None, Depends(RequireUserOptional())],
-    ) -> Any:
+    ) -> models.User:
         if dep_user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
         return dep_user

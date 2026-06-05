@@ -2,5 +2,8 @@
     "project_name": "FastAPI Perfectionist Starter",
     "project_slug": "{{ cookiecutter.project_name.lower()|trim()|replace(' ', '_')|replace('-', '_')|replace('.', '_') }}",
     "project_description": "My Awesome Project!",
-    "project_version": "0.1.0"
+    "project_version": "0.1.0",
+    "author": "Your Name",
+    "author_email": "you@example.com",
+    "python_version": "3.12"
 }

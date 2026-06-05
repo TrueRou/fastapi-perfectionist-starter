@@ -5,13 +5,11 @@ from fastapi import FastAPI
 from loguru import logger
 
 from .api import router
-from .infra import engine, logging, middleware, settings
-
-logging.init_logger()
+from .infra import engine, logging, middleware, response, settings
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     logger.patch(logging.source("", "")).info("Listening at http://{}:{}", settings.app_host, settings.app_port)
     await engine.init_db()
     yield
@@ -20,15 +18,16 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator:
 
 def init_middlewares(asgi_app: FastAPI) -> None:
     middleware.cors.add_middleware(asgi_app)
+    middleware.error.add_middleware(asgi_app)
     middleware.error.add_exception_handler(asgi_app)
 
 
 def init_routes(asgi_app: FastAPI) -> None:
-
     asgi_app.include_router(router)
 
 
 def create_app() -> FastAPI:
+    logging.init_logger()
     openapi_url = "/openapi.json" if settings.app_debug else None
     asgi_app = FastAPI(
         title="{{ cookiecutter.project_name }}",
@@ -38,8 +37,8 @@ def create_app() -> FastAPI:
     )
 
     @asgi_app.get("/")
-    async def root():
-        return {"message": "Welcome to {{ cookiecutter.project_name }}"}
+    async def root() -> response.AppResponse[dict]:
+        return response.ResponseHandler.success({"message": "Welcome to {{ cookiecutter.project_name }}"})
 
     init_middlewares(asgi_app)
     init_routes(asgi_app)

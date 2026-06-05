@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 from pydantic import ConfigDict
@@ -25,13 +25,13 @@ class BaseDbModel(BaseModel):
 
 class PkWithTimestampDbModel(BaseDbModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class User(PkWithTimestampDbModel, table=True):
-    username: str = Field(index=True)
-    email: str = Field(index=True)
+    username: str = Field(index=True, unique=True)
+    email: str = Field(index=True, unique=True)
     hashed_password: str
 
     rel_notes: list["Note"] = Rel(back_populates="rel_user", eager="raise")

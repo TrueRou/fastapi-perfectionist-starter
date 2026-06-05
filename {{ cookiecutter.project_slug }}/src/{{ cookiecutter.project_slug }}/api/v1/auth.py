@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Form
+from fastapi import APIRouter, Body, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from {{ cookiecutter.project_slug }}.infra import models, response, settings
 from {{ cookiecutter.project_slug }}.modules.user import RequireUser, UserService
@@ -21,11 +22,10 @@ async def register(
 
 @router.post("/auth/token", response_model=UserAuthResponse)
 async def login(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
+    form: Annotated[OAuth2PasswordRequestForm, Depends()],
     srv_user: Annotated[UserService, Depends()],
 ):
-    user: models.User = await srv_user.auth_user(username, password)
+    user: models.User = await srv_user.auth_user(form.username, form.password)
     return UserAuthResponse(
         access_token=srv_user.generate_token(user),
         token_type="Bearer",

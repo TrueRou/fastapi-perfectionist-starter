@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -33,7 +33,7 @@ class NoteService:
             note.title = title
         if content is not None:
             note.content = content
-        note.updated_at = datetime.utcnow()
+        note.updated_at = datetime.now(timezone.utc)
         await self.session.flush([note])
         return note
 

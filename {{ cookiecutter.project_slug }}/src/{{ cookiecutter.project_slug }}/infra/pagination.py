@@ -30,7 +30,8 @@ async def paginate(
     params: PaginationParams,
 ) -> Page[T]:
     total_row = await session.scalar(select(func.count()).select_from(query.subquery()))
-    assert isinstance(total_row, int), "A database error occurred when getting `total_row`."
+    if not isinstance(total_row, int):
+        raise RuntimeError("A database error occurred when getting `total_row`.")
 
     total_pages = (total_row + params.page_size - 1) // params.page_size
     total_pages = max(total_pages, 1)

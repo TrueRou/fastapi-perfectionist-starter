@@ -47,11 +47,11 @@ class UserService:
         now = datetime.now(timezone.utc)
         expires_at = now + timedelta(days=settings.jwt_expiration_days)
         payload = {"sub": str(user.id), "exp": int(expires_at.timestamp())}
-        return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+        return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
     def verify_token(self, token: str) -> dict:
         try:
-            return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+            return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
         except jwt.InvalidTokenError:
