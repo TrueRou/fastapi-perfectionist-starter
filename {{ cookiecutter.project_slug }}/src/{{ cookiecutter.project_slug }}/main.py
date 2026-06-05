@@ -4,18 +4,15 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from loguru import logger
 
-from {{ cookiecutter.project_slug }}.api.middleware import cors, error
-from {{ cookiecutter.project_slug }}.api.router import router as api_router
-from {{ cookiecutter.project_slug }}.infra import engine
-from {{ cookiecutter.project_slug }}.infra import logging as app_logging
-from {{ cookiecutter.project_slug }}.infra.settings import settings
+from .api import router
+from .infra import engine, logging, middleware, settings
 
-app_logging.init_logger()
+logging.init_logger()
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator:
-    logger.patch(app_logging.source("", "")).info(
+    logger.patch(logging.source("", "")).info(
         "Listening at http://{}:{}", settings.app_host, settings.app_port
     )
     await engine.init_db()
@@ -24,13 +21,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator:
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
-    cors.add_middleware(asgi_app)
-    error.add_middleware(asgi_app)
-    error.add_exception_handler(asgi_app)
+    middleware.cors.add_middleware(asgi_app)
+    middleware.error.add_exception_handler(asgi_app)
 
 
 def init_routes(asgi_app: FastAPI) -> None:
-    asgi_app.include_router(api_router)
+    
+
+    asgi_app.include_router(router)
 
 
 def create_app() -> FastAPI:

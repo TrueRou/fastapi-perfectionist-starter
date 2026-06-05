@@ -9,29 +9,26 @@ from fastapi import Depends, HTTPException, status
 from sqlmodel import col, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from {{ cookiecutter.project_slug }}.infra.engine import get_db
-from {{ cookiecutter.project_slug }}.infra.models import User
-from {{ cookiecutter.project_slug }}.infra.settings import settings as _default_settings
+from {{ cookiecutter.project_slug }}.infra import engine, models, settings
 
 
 class UserService:
-    def __init__(self, session: Annotated[AsyncSession, Depends(get_db)]):
+    def __init__(self, session: Annotated[AsyncSession, Depends(engine.get_db)]):
         self.session = session
         self.hasher = PasswordHasher()
-        self.settings = _default_settings
 
-    async def create_user(self, username: str, email: str, password: str) -> User:
-        clause = select(User).where(or_(col(User.username) == username, col(User.email) == email))
+    async def create_user(self, username: str, email: str, password: str) -> models.User:
+        clause = select(models.User).where(or_(col(models.User.username) == username, col(models.User.email) == email))
         if (await self.session.exec(clause)).first():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username or email already taken")
 
-        user = User(username=username, email=email, hashed_password=self.hasher.hash(password))
+        user = models.User(username=username, email=email, hashed_password=self.hasher.hash(password))
         self.session.add(user)
         await self.session.flush([user])
         return user
 
-    async def auth_user(self, username: str, password: str) -> User:
-        clause = select(User).where(or_(col(User.username) == username, col(User.email) == username))
+    async def auth_user(self, username: str, password: str) -> models.User:
+        clause = select(models.User).where(or_(col(models.User.username) == username, col(models.User.email) == username))
         user = (await self.session.exec(clause)).first()
         try:
             if not user:
@@ -41,18 +38,18 @@ class UserService:
         except VerifyMismatchError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
-    async def get_user(self, user_id: uuid.UUID) -> User | None:
-        return await self.session.get(User, user_id)
+    async def get_user(self, user_id: uuid.UUID) -> models.User | None:
+        return await self.session.get(models.User, user_id)
 
-    def generate_token(self, user: User) -> str:
+    def generate_token(self, user: models.User) -> str:
         now = datetime.now(timezone.utc)
-        expires_at = now + timedelta(days=self.settings.jwt_expiration_days)
+        expires_at = now + timedelta(days=settings.jwt_expiration_days)
         payload = {"sub": str(user.id), "exp": int(expires_at.timestamp())}
-        return jwt.encode(payload, self.settings.jwt_secret, algorithm="HS256")
+        return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
 
     def verify_token(self, token: str) -> dict:
         try:
-            return jwt.decode(token, self.settings.jwt_secret, algorithms=["HS256"])
+            return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
         except jwt.InvalidTokenError:

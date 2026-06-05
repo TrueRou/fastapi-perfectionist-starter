@@ -3,10 +3,10 @@ from datetime import datetime
 
 from pydantic import Field
 
-from {{ cookiecutter.project_slug }}.infra.models import BaseModel
+from {{ cookiecutter.project_slug }}.infra import models
 
 
-class NotePublic(BaseModel):
+class NotePublic(models.BaseModel):
     id: uuid.UUID
     title: str
     content: str
@@ -15,11 +15,11 @@ class NotePublic(BaseModel):
     updated_at: datetime
 
 
-class NoteCreateRequest(BaseModel):
+class NoteCreateRequest(models.BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     content: str = Field(..., min_length=1)
 
 
-class NoteUpdateRequest(BaseModel):
+class NoteUpdateRequest(models.BaseModel):
     title: str | None = Field(None, min_length=1, max_length=200)
     content: str | None = Field(None, min_length=1)
