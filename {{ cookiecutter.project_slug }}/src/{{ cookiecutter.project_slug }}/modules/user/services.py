@@ -28,7 +28,9 @@ class UserService:
         return user
 
     async def auth_user(self, username: str, password: str) -> models.User:
-        clause = select(models.User).where(or_(col(models.User.username) == username, col(models.User.email) == username))
+        clause = select(models.User).where(
+            or_(col(models.User.username) == username, col(models.User.email) == username)
+        )
         user = (await self.session.exec(clause)).first()
         try:
             if not user:

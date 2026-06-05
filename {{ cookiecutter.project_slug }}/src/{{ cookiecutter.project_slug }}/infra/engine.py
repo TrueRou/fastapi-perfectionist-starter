@@ -49,5 +49,5 @@ async def init_db(skip_migration: bool = False) -> None:
             async with db_engine.begin() as conn:
                 await conn.run_sync(_execute_upgrade)
         logger.patch(app_logging.source()).info("Database ready at {}", settings.database_url)
-    except (SQLAlchemyError, OSError):
+    except SQLAlchemyError, OSError:
         logger.patch(app_logging.source()).error("Failed to connect to database at {}", settings.database_url)

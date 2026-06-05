@@ -2,10 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Query
 
-from .schema.note import NoteCreateRequest, NotePublic, NoteUpdateRequest
 from {{ cookiecutter.project_slug }}.infra import models, pagination, response
-from {{ cookiecutter.project_slug }}.modules.note import RequireNote, NoteService
+from {{ cookiecutter.project_slug }}.modules.note import NoteService, RequireNote
 from {{ cookiecutter.project_slug }}.modules.user import RequireUser
+
+from .schema.note import NoteCreateRequest, NotePublic, NoteUpdateRequest
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 

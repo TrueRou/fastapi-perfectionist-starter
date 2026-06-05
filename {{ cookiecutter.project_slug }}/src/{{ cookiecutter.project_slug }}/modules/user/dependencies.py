@@ -22,7 +22,7 @@ class RequireUserOptional:
         payload = srv_user.verify_token(dep_token)
         try:
             user_id = uuid.UUID(payload.get("sub"))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed token")
 
         return await srv_user.get_user(user_id)

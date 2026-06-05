@@ -23,7 +23,9 @@ class NoteService:
         return await self.session.get(models.Note, note_id)
 
     async def list_notes(self, user_id: uuid.UUID, params: pagination.PaginationParams) -> pagination.Page[models.Note]:
-        query = select(models.Note).where(col(models.Note.user_id) == user_id).order_by(col(models.Note.created_at).desc())
+        query = (
+            select(models.Note).where(col(models.Note.user_id) == user_id).order_by(col(models.Note.created_at).desc())
+        )
         return await pagination.paginate(self.session, query, params)
 
     async def update_note(self, note: models.Note, title: str | None = None, content: str | None = None) -> models.Note:

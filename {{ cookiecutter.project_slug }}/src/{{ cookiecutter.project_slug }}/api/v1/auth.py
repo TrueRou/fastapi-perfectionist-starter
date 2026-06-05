@@ -2,9 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Form
 
-from .schema.user import UserAuthResponse, UserCreateRequest, UserPublic
 from {{ cookiecutter.project_slug }}.infra import models, response, settings
 from {{ cookiecutter.project_slug }}.modules.user import RequireUser, UserService
+
+from .schema.user import UserAuthResponse, UserCreateRequest, UserPublic
 
 router = APIRouter(tags=["auth"])
 

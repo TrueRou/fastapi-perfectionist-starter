@@ -12,9 +12,7 @@ logging.init_logger()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator:
-    logger.patch(logging.source("", "")).info(
-        "Listening at http://{}:{}", settings.app_host, settings.app_port
-    )
+    logger.patch(logging.source("", "")).info("Listening at http://{}:{}", settings.app_host, settings.app_port)
     await engine.init_db()
     yield
     await engine.db_engine.dispose()
@@ -26,7 +24,6 @@ def init_middlewares(asgi_app: FastAPI) -> None:
 
 
 def init_routes(asgi_app: FastAPI) -> None:
-    
 
     asgi_app.include_router(router)
 
