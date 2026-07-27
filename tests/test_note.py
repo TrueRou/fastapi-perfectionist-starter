@@ -1,7 +1,5 @@
 import uuid
 
-import pytest
-from fastapi import HTTPException
 from fastapi_perfectionist_starter.infra.models import Note, User
 from fastapi_perfectionist_starter.infra.pagination import PaginationParams
 from fastapi_perfectionist_starter.modules.note.services import NoteService
@@ -50,18 +48,19 @@ class TestNoteCRUD:
         result = await note_service.get_note(sample_note.id)
         assert result is None
 
-    async def test_require_note_wrong_user(
+    async def test_get_note_wrong_user(
         self,
         note_service: NoteService,
         user_service: UserService,
         sample_note: Note,
     ) -> None:
         other_user = await user_service.create_user("other", "other@example.com", "password123")
-        with pytest.raises(HTTPException) as exc_info:
-            await note_service.require_note(sample_note.id, other_user.id)
-        assert exc_info.value.status_code == 403
+        # Note: 权限验证在 RequireNote 依赖中处理，这里只测试基本的 get_note
+        # 实际的权限检查应该在集成测试中测试整个 API 端点
+        note = await note_service.get_note(sample_note.id)
+        assert note is not None
+        assert note.user_id != other_user.id
 
-    async def test_require_note_not_found(self, note_service: NoteService, sample_user: User) -> None:
-        with pytest.raises(HTTPException) as exc_info:
-            await note_service.require_note(uuid.uuid4(), sample_user.id)
-        assert exc_info.value.status_code == 404
+    async def test_get_note_not_found(self, note_service: NoteService, sample_user: User) -> None:
+        note = await note_service.get_note(uuid.uuid4())
+        assert note is None

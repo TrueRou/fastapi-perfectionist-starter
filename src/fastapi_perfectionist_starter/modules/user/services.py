@@ -21,7 +21,7 @@ class UserService:
 
         user = models.User(username=username, email=email, hashed_password=self.hasher.hash(password))
         self.session.add(user)
-        await self.session.flush([user])
+        await self.session.flush()
         return user
 
     async def get_user(self, user_id: uuid.UUID) -> models.User:

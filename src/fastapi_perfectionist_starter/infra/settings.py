@@ -26,8 +26,7 @@ class Settings(BaseSettings):
     def validate_jwt_secret_in_production(self) -> Settings:
         if not self.app_debug and self.jwt_secret == DEFAULT_JWT_SECRET:
             raise ValueError(
-                "当 app_debug 为 False 时，jwt_secret 必须从默认值修改。"
-                "请在环境变量或 .env 文件中设置 JWT_SECRET。"
+                "当 app_debug 为 False 时，jwt_secret 必须从默认值修改。请在环境变量或 .env 文件中设置 JWT_SECRET。"
             )
         return self
 

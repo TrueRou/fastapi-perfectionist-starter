@@ -22,7 +22,7 @@ class RequireAuthUser:
 
         try:
             user_id = uuid.UUID(payload.get("sub"))
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="令牌格式无效") from None
 
         return await srv_user.get_user(user_id)

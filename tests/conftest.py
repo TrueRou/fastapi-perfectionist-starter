@@ -1,11 +1,18 @@
+import os
+
+# 设置测试环境变量（必须在导入项目模块之前）
+os.environ["APP_DEBUG"] = "true"
+
 from collections.abc import AsyncIterator
 
 import pytest
 import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+
 from fastapi_perfectionist_starter.infra.models import DbBase, Note, User
+from fastapi_perfectionist_starter.modules.auth.services import AuthService
 from fastapi_perfectionist_starter.modules.note.services import NoteService
 from fastapi_perfectionist_starter.modules.user.services import UserService
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -30,6 +37,11 @@ async def session(engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
 @pytest.fixture()
 def user_service(session: AsyncSession) -> UserService:
     return UserService(session)
+
+
+@pytest.fixture()
+def auth_service(session: AsyncSession, user_service: UserService) -> AuthService:
+    return AuthService(session, user_service)
 
 
 @pytest.fixture()
